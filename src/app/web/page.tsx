@@ -16,14 +16,6 @@ export default function WebPage() {
         title="Web development"
         lede="Full-stack applications on the MERN stack, plus production frontend work at IIT Bombay's Spoken Tutorial project."
       />
-      <section className="section wrap" aria-labelledby="web-projects">
-        <h2 id="web-projects">Projects</h2>
-        <div className="grid">
-          {byCategory("web").map((p) => (
-            <ProjectCard key={p.slug} p={p} />
-          ))}
-        </div>
-      </section>
       <section className="section wrap" aria-labelledby="web-work">
         <h2 id="web-work">Professional work</h2>
         <Timeline roles={roles.filter((r) => r.category === "web")} />

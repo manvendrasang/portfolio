@@ -18,7 +18,7 @@ export default function ThreeDPage() {
         lede="Blender for modeling and renders, Godot for interactive scenes. Finished pieces will appear here with breakdowns."
       />
       <section className="section wrap" aria-labelledby="three-d-work">
-        <h2 id="three-d-work">Renders and scenes</h2>
+        <h2 id="three-d-work">Renders and scenes (preview only)</h2>
         {items.length > 0 ? (
           <div className="grid">
             {items.map((p) => (

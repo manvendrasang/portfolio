@@ -61,7 +61,7 @@ export default function Home() {
         <p className="eyebrow">Featured work</p>
         <h2 id="work-title">Projects</h2>
         <div className="grid">
-          {projects.filter((p) => p.category !== "3d").map((p) => (
+          {projects.filter((p) => p.category !== "3d" && !["agentic-it-ticket-manager", "mern-team-task-manager"].includes(p.slug)).map((p) => (
             <ProjectCard key={p.slug} p={p} />
           ))}
         </div>
