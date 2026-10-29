@@ -175,6 +175,22 @@ export const projects: Project[] = [
     links: [{ label: "Watch Render", href: asset("/images/orb/0001-0250.mp4") }],
   },
   {
+    slug: "new-web-project",
+    title: "BigCRM",
+    category: "web",
+    status: "Research project",
+    summary: "Multi-tenant CRM platform empowering organizations to manage customer relationships, sales pipelines, and internal operations.",
+    details: [
+      "Full-stack CRM platform built with React, TypeScript, Node.js, Express, and PostgreSQL",
+      "Role-based access control ensures organization-level data isolation and security",
+      "Features sales pipeline management, task scheduling, analytics, and notification systems",
+      "Includes CSV import/export, saved views, and database-level audit logging for compliance"
+    ],
+    stack: ["React", "TypeScript", "Node.js", "Express", "PostgreSQL"],
+    related: "Internal business tool",
+    links: [{ label: "GitHub Repo", href: "https://github.com" }, { label: "Live Demo", href: "https://example.com" }],
+  },
+  {
     slug: "planet",
     title: "Planet",
     category: "3d",
@@ -253,7 +269,7 @@ export const roles: Role[] = [
 export const skills: { group: string; items: string[] }[] = [
   {
     group: "Languages and web",
-    items: ["Python", "JavaScript", "TypeScript", "C/C++", "ReactJS", "HTML5", "Tailwind CSS", "Node.js", "MERN Stack", "GDScript"],
+    items: ["Python", "JavaScript", "TypeScript", "C/C++", "ReactJS", "HTML5", "Tailwind CSS", "Node.js", "MERN Stack", "Lua"],
   },
   {
     group: "Data and cloud",
@@ -286,7 +302,7 @@ export const skills: { group: string; items: string[] }[] = [
   },
   {
     group: "App types",
-    items: ["CRM", "HRM", "CRUD apps"],
+    items: ["CRM", "CRUD apps"],
   },
 ];
 

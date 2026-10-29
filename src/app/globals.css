@@ -123,7 +123,7 @@ p { margin: 0 0 14px; }
   -webkit-background-clip: text; background-clip: text; color: transparent;
   filter: drop-shadow(0 0 28px color-mix(in srgb, var(--accent) 35%, transparent));
 }
-.hero .name { font-family: var(--font-mono); letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); font-size: 0.95rem; margin-bottom: 18px; }
+.hero .name { font-family: var(--font-mono); letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); font-size: 1.1rem; margin-bottom: 18px; }
 .hero-sub { font-size: clamp(1.1rem, 2.2vw, 1.4rem); color: var(--muted); max-width: 52ch; margin-bottom: 28px; }
 .hint { font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); margin-top: 28px; opacity: 0.8; }
 
