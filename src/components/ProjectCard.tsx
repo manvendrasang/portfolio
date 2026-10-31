@@ -18,29 +18,12 @@ export default function ProjectCard({ p }: { p: Project }) {
     el.style.setProperty("--gy", `${(y * 100).toFixed(1)}%`);
   };
   const leave = (e: PointerEvent<HTMLElement>) => {
-    const el = e.currentTarget;
-    el.style.removeProperty("--rx");
-    el.style.removeProperty("--ry");
+    e.currentTarget.style.removeProperty("--rx");
+    e.currentTarget.style.removeProperty("--ry");
   };
 
   return (
     <article className="card tilt link" onPointerMove={move} onPointerLeave={leave}>
-      {p.links && p.links.length > 0 && p.links.some((l) => l.href.toLowerCase().endsWith(".mp4")) && (
-        <div className="card-video">
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="card-video-clip"
-          >
-            <source
-              src={p.links.find((l) => l.href.toLowerCase().endsWith(".mp4"))!.href}
-              type="video/mp4"
-            />
-          </video>
-        </div>
-      )}
       <p className="status">{p.status}</p>
       <h3>
         <Link href={`/projects/${p.slug}/`}>{p.title}</Link>

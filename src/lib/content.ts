@@ -1,7 +1,6 @@
 /**
  * Single source of truth for site content.
- * Every fact here comes from Manvendra's résumé (Manvendra_Sang_Resume_Updated.pdf).
- * Anything not in the résumé is deliberately left out. See README "Content still to add".
+ * Every fact here comes from Manvendra's résumé. Anything not in the résumé is deliberately left out.
  */
 import { asset } from "@/lib/asset";
 
@@ -17,9 +16,10 @@ export interface Project {
   stack: string[];
   /** Headline number, only when the résumé states one. */
   metric?: { value: string; label: string };
-  /** Add repo / live demo links here when you have them. */
-  links?: { label: string; href: string }[];
-  related?: string;
+  /** Render clip (3D projects). Shown in the carousel and on the project page. */
+  video?: string;
+  /** Opens in a lightbox from the "Architecture preview" button on the project page. */
+  preview?: { label: string; src: string; alt: string };
 }
 
 export interface Role {
@@ -47,21 +47,22 @@ export const person = {
   location: "New Delhi, India",
 };
 
+/** BigCRM architecture GIF. Drop the file at public/images/bigcrm/ or change this one line. */
+const BIGCRM_GIF = asset("public/images/bigcrm.gif");
+
+/** Every 3D piece is the same shape: a Blender render with a clip. */
+const render = (slug: string, title: string, what: string, file: string): Project => ({
+  slug,
+  title,
+  category: "3d",
+  status: "Render",
+  summary: `3D render animation of ${what}.`,
+  details: ["Final render output."],
+  stack: ["Blender", "3D Rendering"],
+  video: asset(`/images/${slug}/${file}`),
+});
+
 export const projects: Project[] = [
-  {
-    slug: "agentic-it-ticket-manager",
-    title: "Agentic AI IT Ticket Manager",
-    category: "ai",
-    status: "In progress",
-    summary:
-      "An AI agent that resolves low-urgency support tickets on its own and escalates only the ones that need a person.",
-    details: [
-      "The goal is to cut the workload on a support team by letting the agent close routine tickets without human review.",
-      "Triage uses LLM-based logic to decide whether a ticket is low urgency or needs escalation.",
-      "The code is Python with a modular, object-oriented structure.",
-    ],
-    stack: ["Python", "LLM triage", "OOP"],
-  },
   {
     slug: "eeg-phoneme-classifier",
     title: "EEG Phoneme Classifier",
@@ -77,129 +78,32 @@ export const projects: Project[] = [
     ],
     stack: ["Echo State Networks", "Reservoir computing", "EEG signals", "Python"],
     metric: { value: "78.7%", label: "classification accuracy" },
-    related: "Kyushu Institute of Technology internship",
   },
   {
-    slug: "mern-team-task-manager",
-    title: "MERN Team Task Manager",
-    category: "web",
-    status: "Live on Railway",
-    summary:
-      "A full-stack app for assigning tasks to a team, escalating urgent work, and sending warnings.",
-    details: [
-      "Team members get tasks assigned to them, and the app escalates urgency and issues warnings as work becomes overdue or critical.",
-      "The app is deployed live on Railway.",
-      "The whole project is under Git version control.",
-      "Built on MongoDB, Express, React, and Node.js.",
-    ],
-    stack: ["MongoDB", "Express", "React", "Node.js", "Railway", "Git"],
-  },
-  {
-    slug: "car1",
-    title: "Car Render",
-    category: "3d",
-    status: "Render",
-    summary: "3D render animation of a car model.",
-    details: ["Final render output."],
-    stack: ["Blender", "3D Rendering"],
-    links: [{ label: "Watch Render", href: asset("/images/car1/car.mp4") }],
-  },
-  {
-    slug: "cyberblocks",
-    title: "Cyber Blocks",
-    category: "3d",
-    status: "Render",
-    summary: "3D render animation of cybernetic block forms.",
-    details: ["Final render output."],
-    stack: ["Blender", "3D Rendering"],
-    links: [{ label: "Watch Render", href: asset("/images/cyberblocks/0000-0250.mp4") }],
-  },
-  {
-    slug: "fractal",
-    title: "Fractal",
-    category: "3d",
-    status: "Render",
-    summary: "3D render animation of a fractal form.",
-    details: ["Final render output."],
-    stack: ["Blender", "3D Rendering"],
-    links: [{ label: "Watch Render", href: asset("/images/fractal/0001-0250.mp4") }],
-  },
-  {
-    slug: "fractal2",
-    title: "Fractal II",
-    category: "3d",
-    status: "Render",
-    summary: "3D render animation of a second fractal form.",
-    details: ["Final render output."],
-    stack: ["Blender", "3D Rendering"],
-    links: [{ label: "Watch Render", href: asset("/images/fractal2/0001-0320.mp4") }],
-  },
-  {
-    slug: "goop",
-    title: "Goop Simulation",
-    category: "3d",
-    status: "Render",
-    summary: "3D render animation of a fluid goop simulation.",
-    details: ["Final render output."],
-    stack: ["Blender", "3D Rendering"],
-    links: [{ label: "Watch Render", href: asset("/images/goop/Final.mp4") }],
-  },
-  {
-    slug: "loop",
-    title: "Loop Animation",
-    category: "3d",
-    status: "Render",
-    summary: "3D render animation of a looping form.",
-    details: ["Final render output."],
-    stack: ["Blender", "3D Rendering"],
-    links: [{ label: "Watch Render", href: asset("/images/loop/0001-0250.mp4") }],
-  },
-  {
-    slug: "loop2",
-    title: "Loop Animation II",
-    category: "3d",
-    status: "Render",
-    summary: "3D render animation of a second looping form.",
-    details: ["Final render output."],
-    stack: ["Blender", "3D Rendering"],
-    links: [{ label: "Watch Render", href: asset("/images/loop2/0001-0150.mp4") }],
-  },
-  {
-    slug: "orb",
-    title: "Orb",
-    category: "3d",
-    status: "Render",
-    summary: "3D render animation of an orb.",
-    details: ["Final render output."],
-    stack: ["Blender", "3D Rendering"],
-    links: [{ label: "Watch Render", href: asset("/images/orb/0001-0250.mp4") }],
-  },
-  {
-    slug: "new-web-project",
+    slug: "bigcrm",
     title: "BigCRM",
     category: "web",
-    status: "Research project",
-    summary: "Multi-tenant CRM platform empowering organizations to manage customer relationships, sales pipelines, and internal operations.",
+    status: "In development",
+    summary:
+      "A multi-tenant CRM platform where organizations manage customer relationships, sales pipelines, and internal operations.",
     details: [
-      "Full-stack CRM platform built with React, TypeScript, Node.js, Express, and PostgreSQL",
-      "Role-based access control ensures organization-level data isolation and security",
-      "Features sales pipeline management, task scheduling, analytics, and notification systems",
-      "Includes CSV import/export, saved views, and database-level audit logging for compliance"
+      "Full-stack platform built with React, TypeScript, Node.js, Express, and PostgreSQL.",
+      "Role-based access control keeps each organization's data isolated and secure.",
+      "Sales pipeline management, task scheduling, analytics, and notifications.",
+      "CSV import and export, saved views, and database-level audit logging for compliance.",
     ],
     stack: ["React", "TypeScript", "Node.js", "Express", "PostgreSQL"],
-    related: "Internal business tool",
-    links: [{ label: "GitHub Repo", href: "https://github.com" }, { label: "Live Demo", href: "https://example.com" }],
+    preview: { label: "Architecture preview", src: BIGCRM_GIF, alt: "Animated walkthrough of the BigCRM architecture" },
   },
-  {
-    slug: "planet",
-    title: "Planet",
-    category: "3d",
-    status: "Render",
-    summary: "3D render animation of a planet.",
-    details: ["Final render output."],
-    stack: ["Blender", "3D Rendering"],
-    links: [{ label: "Watch Render", href: asset("/images/planet/0001-0315.mp4") }],
-  },
+  render("car1", "Car Render", "a car model", "car.mp4"),
+  render("cyberblocks", "Cyber Blocks", "cybernetic block forms", "0000-0250.mp4"),
+  render("fractal", "Fractal", "a fractal form", "0001-0250.mp4"),
+  render("fractal2", "Fractal II", "a second fractal form", "0001-0320.mp4"),
+  render("goop", "Goop Simulation", "a fluid goop simulation", "Final.mp4"),
+  render("loop", "Loop Animation", "a looping form", "0001-0250.mp4"),
+  render("loop2", "Loop Animation II", "a second looping form", "0001-0150.mp4"),
+  render("orb", "Orb", "an orb", "0001-0250.mp4"),
+  render("planet", "Planet", "a planet", "0001-0315.mp4"),
 ];
 
 export const roles: Role[] = [

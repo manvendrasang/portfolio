@@ -7,8 +7,11 @@ export const metadata: Metadata = {
   description: "MERN apps, TypeScript migrations, and full-stack work by Manvendra Sang.",
 };
 
+const DATA_SKILLS = ["MongoDB", "MySQL", "REST APIs"];
+// Computed once at build time, not on every render.
+const webSkills = [...skills[0].items, ...skills[1].items.filter((i) => DATA_SKILLS.includes(i))];
+
 export default function WebPage() {
-  const webSkills = skills[0].items.concat(skills[1].items.filter((i) => ["MongoDB", "MySQL", "REST APIs"].includes(i)));
   return (
     <>
       <PageHead

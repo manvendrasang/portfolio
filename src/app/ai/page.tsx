@@ -18,7 +18,7 @@ export default function AiPage() {
       <section className="section wrap" aria-labelledby="ai-projects">
         <h2 id="ai-projects">Projects</h2>
         <div className="grid">
-          {byCategory("ai").filter((p) => p.slug !== "agentic-it-ticket-manager").map((p) => (
+          {byCategory("ai").map((p) => (
             <ProjectCard key={p.slug} p={p} />
           ))}
         </div>
