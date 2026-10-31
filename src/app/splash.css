@@ -1,0 +1,136 @@
+/* Launch splash. Pure-CSS timeline (built around INTRO_MS = 3.2s in Splash.tsx) so it plays from first paint. */
+
+@property --sp-r { syntax: "<length>"; inherits: false; initial-value: -12vmax; }
+
+/* The page's own entrance waits for the iris, then plays under it. */
+html[data-splash="on"] main.page-enter { animation-play-state: paused; }
+
+.sp-wrap {
+  position: fixed; inset: 0; z-index: 200; overflow: hidden; color: var(--fg);
+  /* If scripts never run, the splash still removes itself. */
+  animation: sp-failsafe 0.01s 8s forwards;
+}
+.sp-wrap[data-phase="go"] { pointer-events: none; }
+@keyframes sp-failsafe { to { visibility: hidden; pointer-events: none; } }
+
+.sp {
+  position: absolute; inset: 0; overflow: hidden; cursor: pointer; --sp-r: -12vmax;
+  background: radial-gradient(1200px 800px at 50% 40%, var(--bg2), var(--bg) 70%);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent var(--sp-r), #000 calc(var(--sp-r) + 12vmax));
+  mask-image: radial-gradient(circle at 50% 50%, transparent var(--sp-r), #000 calc(var(--sp-r) + 12vmax));
+}
+
+/* Liftoff: the splash opens like an iris onto the launchpad. */
+.sp-wrap[data-phase="go"] .sp { animation: sp-iris 0.95s cubic-bezier(0.65, 0, 0.3, 1) 0.12s forwards; }
+@keyframes sp-iris {
+  from { --sp-r: -12vmax; opacity: 1; }
+  70% { opacity: 1; }
+  to { --sp-r: 150vmax; opacity: 0; }
+}
+.sp-wrap[data-phase="go"] .sp-stage { animation: sp-zoom 0.75s cubic-bezier(0.55, 0, 0.9, 0.4) forwards; }
+@keyframes sp-zoom { to { transform: scale(2.6); opacity: 0; } }
+
+.sp-ring {
+  position: absolute; left: 50%; top: 50%; width: 312vmax; height: 312vmax; margin: -156vmax 0 0 -156vmax;
+  border-radius: 50%; border: 0.5vmax solid var(--accent); pointer-events: none; opacity: 0; transform: scale(0);
+  box-shadow: 0 0 6vmax var(--accent), inset 0 0 6vmax var(--accent2);
+}
+.sp-wrap[data-phase="go"] .sp-ring { animation: sp-ring 0.95s cubic-bezier(0.65, 0, 0.3, 1) 0.12s forwards; }
+@keyframes sp-ring { 0% { transform: scale(0.04); opacity: 1; } 80% { opacity: 0.9; } 100% { transform: scale(1); opacity: 0; } }
+
+.sp-flash {
+  position: absolute; inset: 0; pointer-events: none; opacity: 0;
+  background: radial-gradient(circle at 50% 50%, #fff 0%, var(--accent) 22%, transparent 58%);
+}
+.sp-wrap[data-phase="go"] .sp-flash { animation: sp-flash 0.7s ease-out forwards; }
+@keyframes sp-flash { 0% { opacity: 0; } 14% { opacity: 0.85; } 100% { opacity: 0; } }
+
+/* Backdrop: stars (canvas), drifting colour, shooting stars */
+.sp-stars { position: absolute; inset: 0; width: 100%; height: 100%; animation: sp-fade 0.8s ease both; }
+@keyframes sp-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.sp-glow { position: absolute; border-radius: 50%; will-change: transform; }
+.sp-g1 { width: 60vmax; height: 60vmax; left: -16vmax; top: -20vmax; background: radial-gradient(circle, rgba(124, 140, 255, 0.5), transparent 65%); animation: sp-drift 8s ease-in-out infinite alternate; }
+.sp-g2 { width: 64vmax; height: 64vmax; right: -20vmax; bottom: -24vmax; background: radial-gradient(circle, rgba(255, 95, 210, 0.34), transparent 65%); animation: sp-drift 10s ease-in-out infinite alternate-reverse; }
+.sp-g3 { width: 44vmax; height: 44vmax; left: 50%; top: 42%; margin: -22vmax 0 0 -22vmax; background: radial-gradient(circle, rgba(255, 200, 87, 0.3), transparent 65%); animation: sp-pulse 3.2s ease-in-out infinite; }
+@keyframes sp-drift { to { transform: translate(6vmax, 4vmax) scale(1.12); } }
+@keyframes sp-pulse { 0%, 100% { transform: scale(0.85); opacity: 0.7; } 50% { transform: scale(1.15); opacity: 1; } }
+
+.sp-comet {
+  position: absolute; left: 0; top: 0; width: 150px; height: 2px; border-radius: 2px; opacity: 0; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.95));
+  box-shadow: 0 0 10px rgba(255, 200, 87, 0.7);
+  animation: sp-comet 1.1s cubic-bezier(0.4, 0, 0.8, 0.6) var(--d) both;
+}
+@keyframes sp-comet {
+  0% { opacity: 0; transform: translate(var(--x0), var(--y0)) rotate(28deg); }
+  15% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--x1), var(--y1)) rotate(28deg); }
+}
+
+/* Stage */
+.sp-stage {
+  position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 24px 16px;
+}
+
+/* The wheel: draws itself, spins up (accelerating toward liftoff), pods pop in */
+.sp-wheel {
+  width: clamp(120px, 34vmin, 340px); aspect-ratio: 1; overflow: visible; flex: none;
+  filter: drop-shadow(0 0 18px rgba(255, 200, 87, 0.4));
+  animation: sp-wheel-in 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes sp-wheel-in { from { opacity: 0; transform: scale(0.55); } }
+.sp-spin { transform-box: fill-box; transform-origin: center; animation: sp-spin-up 3.2s cubic-bezier(0.4, 0, 0.9, 0.55) both; }
+@keyframes sp-spin-up { to { transform: rotate(720deg); } }
+.sp-draw { stroke-dasharray: 1; stroke-dashoffset: 1; animation: sp-draw 1.2s cubic-bezier(0.3, 0.7, 0.2, 1) 0.15s forwards; }
+.sp-draw-in { animation-delay: 0.45s; }
+.sp-spoke { animation-delay: calc(0.5s + var(--k) * 0.05s); animation-duration: 0.8s; }
+@keyframes sp-draw { to { stroke-dashoffset: 0; } }
+.sp-pod { transform-box: fill-box; transform-origin: center; animation: sp-pop 0.55s cubic-bezier(0.2, 1.6, 0.4, 1) calc(0.95s + var(--k) * 0.06s) both; }
+@keyframes sp-pop { from { transform: scale(0); opacity: 0; } }
+.sp-hub { animation: sp-hub 0.7s cubic-bezier(0.2, 1.4, 0.4, 1) 0.4s both; }
+@keyframes sp-hub { from { transform: scale(0); opacity: 0; } }
+
+/* Glass card: name, headline, countdown. Blurs the wheel and stars behind it. */
+.sp-card {
+  position: relative; margin-top: -3vmin; width: min(560px, 92vw); text-align: center;
+  padding: clamp(16px, 3vmin, 28px) clamp(18px, 3.4vmin, 32px); border-radius: 22px;
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.2));
+  background: var(--glass-sheen, linear-gradient(135deg, rgba(255, 255, 255, 0.16), transparent 60%)), var(--card);
+  backdrop-filter: blur(16px) saturate(170%); -webkit-backdrop-filter: blur(16px) saturate(170%);
+  box-shadow: var(--glass-edge, inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 12px 40px rgba(0, 0, 0, 0.38));
+  animation: sp-card-in 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.35s both;
+}
+@keyframes sp-card-in { from { opacity: 0; transform: translateY(40px) scale(0.96); } }
+
+.sp-name { margin: 0 0 6px; font-family: var(--font-mono); font-size: clamp(0.72rem, 2.2vmin, 0.95rem); letter-spacing: 0.3em; color: var(--accent); }
+.sp-word { display: inline-block; white-space: nowrap; }
+.sp-letter { display: inline-block; animation: sp-rise 0.6s cubic-bezier(0.2, 0.9, 0.2, 1) calc(0.55s + var(--k) * 0.045s) both; }
+@keyframes sp-rise { from { opacity: 0; transform: translateY(0.9em) scale(0.9); filter: blur(8px); } }
+
+.sp-headline { font-family: var(--font-display); font-weight: 800; font-size: clamp(2.2rem, 9vmin, 4.6rem); line-height: 1.05; letter-spacing: -0.03em; text-transform: lowercase; margin: 0 0 6px; }
+.sp-hword {
+  display: inline-block; padding-bottom: 0.08em;
+  background: linear-gradient(100deg, var(--fg) 10%, var(--accent) 40%, var(--accent2) 70%, var(--fg) 100%); background-size: 250% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: sp-rise 0.8s cubic-bezier(0.2, 0.9, 0.2, 1) calc(1.05s + var(--k) * 0.14s) both, sp-shimmer 2.6s linear 2s infinite;
+}
+@keyframes sp-shimmer { to { background-position: -250% 0; } }
+
+.sp-sub { margin: 0 0 14px; color: var(--muted); font-size: clamp(0.85rem, 2.2vmin, 1rem); animation: sp-fade 0.8s ease 1.6s both; }
+
+.sp-meter { animation: sp-fade 0.6s ease 0.8s both; }
+.sp-meter-row { display: flex; justify-content: space-between; gap: 12px; font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.sp-meter-row span:last-child { color: var(--accent); }
+.sp-track { display: block; width: 100%; height: clamp(34px, 6vmin, 44px); overflow: visible; }
+.sp-lit { filter: drop-shadow(0 0 4px var(--accent)); }
+.sp-cart { filter: drop-shadow(0 0 5px var(--accent)); }
+
+.sp-skip { position: absolute; z-index: 3; right: clamp(14px, 3vw, 32px); bottom: clamp(14px, 3vh, 32px); padding: 8px 16px; font-size: 0.85rem; animation: sp-fade 0.6s ease 1s both; }
+.sp-wrap[data-phase="go"] .sp-skip { visibility: hidden; }
+
+/* Reduced motion: no splash at all (Splash.tsx also bails out in JS). */
+@media (prefers-reduced-motion: reduce) {
+  .sp-wrap { display: none; }
+}

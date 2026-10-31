@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "./splash.css";
 import Shell from "@/components/Shell";
+import Splash from "@/components/Splash";
 import { person } from "@/lib/content";
 import { asset } from "@/lib/asset";
 
@@ -26,10 +28,21 @@ export const viewport: Viewport = {
   themeColor: "#070817",
 };
 
+/**
+ * Runs before first paint. Holds the page's entrance animation until the splash opens, and records
+ * the start time so the splash's JS and CSS share one clock. A timeout releases the hold if scripts fail.
+ */
+const SPLASH_GATE =
+  'var d=document.documentElement;d.dataset.splash="on";window.__spStart=performance.now();setTimeout(function(){delete d.dataset.splash},9000);';
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: SPLASH_GATE }} />
+      </head>
       <body>
+        <Splash />
         <Shell>{children}</Shell>
       </body>
     </html>

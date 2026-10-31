@@ -47,8 +47,8 @@ export const person = {
   location: "New Delhi, India",
 };
 
-/** BigCRM architecture GIF. Drop the file at public/images/bigcrm/ or change this one line. */
-const BIGCRM_GIF = asset("public/images/bigcrm.gif");
+/** BigCRM architecture GIF, served from public/bigcrm.gif (the "public" folder is never part of a URL). */
+const BIGCRM_GIF = asset("/bigcrm.gif");
 
 /** Every 3D piece is the same shape: a Blender render with a clip. */
 const render = (slug: string, title: string, what: string, file: string): Project => ({
