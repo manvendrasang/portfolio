@@ -3,6 +3,7 @@ import "./globals.css";
 import "./splash.css";
 import Shell from "@/components/Shell";
 import Splash from "@/components/Splash";
+import LiquidGlassFx from "@/components/LiquidGlassFx";
 import { person } from "@/lib/content";
 import { asset } from "@/lib/asset";
 
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <Splash />
+        <LiquidGlassFx />
         <Shell>{children}</Shell>
       </body>
     </html>

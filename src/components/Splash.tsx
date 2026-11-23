@@ -250,8 +250,8 @@ export default function Splash() {
               <circle className="sp-draw sp-draw-in" r="62" fill="none" stroke="rgba(255,255,255,0.28)" strokeWidth="1.5" pathLength={1} />
               {Array.from({ length: PODS }, (_, i) => {
                 const a = (i / PODS) * Math.PI * 2;
-                const x = Math.cos(a) * 100;
-                const y = Math.sin(a) * 100;
+                const x = +(Math.cos(a) * 100).toFixed(3);
+                const y = +(Math.sin(a) * 100).toFixed(3);
                 return (
                   <g key={i} style={{ "--k": i } as CSSProperties}>
                     <line className="sp-draw sp-spoke" x1="0" y1="0" x2={x} y2={y} stroke="rgba(255,255,255,0.3)" strokeWidth="1.2" pathLength={1} />
