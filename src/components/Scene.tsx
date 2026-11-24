@@ -1,6 +1,6 @@
 "use client";
 
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 
@@ -32,6 +32,45 @@ function useDotTexture() {
   }, []);
   useEffect(() => () => tex.dispose(), [tex]);
   return tex;
+}
+
+/**
+ * Renders on a fixed budget instead of every display refresh. The scene is slow ambient motion, so 30 fps
+ * looks the same, and it frees the GPU for the glass layers that re-blur the canvas on every frame.
+ * Nothing is drawn while the tab is hidden.
+ */
+function Pacer({ fps, onSlow }: { fps: number; onSlow?: () => void }) {
+  const invalidate = useThree((s) => s.invalidate);
+  useEffect(() => {
+    const gap = 1000 / fps - 1;
+    let raf = 0;
+    let last = 0;
+    const tick = (t: number) => {
+      raf = requestAnimationFrame(tick);
+      if (document.hidden || t - last < gap) return;
+      last = t;
+      invalidate();
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [fps, invalidate]);
+
+  // If the machine cannot keep the budget, say so; the shell then steps down to a lighter tier.
+  const win = useRef({ n: 0, sum: 0, bad: 0, age: 0 });
+  useFrame((_, dt) => {
+    if (!onSlow || dt > 0.5) return; // a long gap is a hidden tab, not a slow frame
+    const w = win.current;
+    w.n++;
+    w.sum += dt;
+    if (w.n < 45) return;
+    w.age++;
+    // The first window pays for shader compilation and texture upload, so it is not judged.
+    if (w.age > 1) w.bad = w.sum / w.n > (1 / fps) * 1.6 ? w.bad + 1 : 0;
+    w.n = 0;
+    w.sum = 0;
+    if (w.bad >= 2) onSlow();
+  });
+  return null;
 }
 
 /** Pointer position in -1..1, shared by every scene for parallax steering. */
@@ -94,11 +133,11 @@ function Orbiter({
   return (
     <group rotation={[tilt, 0, tilt * 0.6]}>
       <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[radius, 0.012, 6, 96]} />
+        <torusGeometry args={[radius, 0.012, 4, 72]} />
         <meshBasicMaterial color={color} transparent opacity={0.22} />
       </mesh>
       <mesh ref={body}>
-        <sphereGeometry args={[size, 16, 16]} />
+        <sphereGeometry args={[size, 12, 12]} />
         <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.7} />
       </mesh>
     </group>
@@ -129,11 +168,11 @@ function Observatory({ n }: { n: number }) {
           <meshStandardMaterial color={p.b} flatShading roughness={0.6} />
         </mesh>
         <mesh ref={ring} rotation={[Math.PI / 2.2, 0, 0]}>
-          <torusGeometry args={[3.6, 0.07, 8, 96]} />
+          <torusGeometry args={[3.6, 0.07, 6, 72]} />
           <meshStandardMaterial color={p.a} emissive={p.a} emissiveIntensity={0.6} />
         </mesh>
         <mesh ref={moon}>
-          <sphereGeometry args={[0.35, 16, 16]} />
+          <sphereGeometry args={[0.35, 12, 12]} />
           <meshStandardMaterial color={p.a} emissive={p.a} emissiveIntensity={0.5} />
         </mesh>
         {/* One orbiter per destination, in that destination's accent color. */}
@@ -227,7 +266,7 @@ function Nebula({ n }: { n: number }) {
       <group ref={nodes}>
         {pos.map((v, i) => (
           <mesh key={i} position={v}>
-            <sphereGeometry args={[0.16, 10, 10]} />
+            <sphereGeometry args={[0.16, 8, 8]} />
             <meshBasicMaterial color={i % 4 === 0 ? p.b : p.a} />
           </mesh>
         ))}
@@ -258,14 +297,19 @@ function Midway({ n }: { n: number }) {
           dummy.scale.set(0.8, h, 0.8);
           dummy.updateMatrix();
           cubes.current.setMatrixAt(i, dummy.matrix);
-          cubes.current.setColorAt(i, (x + y) % 2 ? colorA : colorB);
           i++;
         }
       }
       cubes.current.instanceMatrix.needsUpdate = true;
-      if (cubes.current.instanceColor) cubes.current.instanceColor.needsUpdate = true;
     }
   });
+  // Colours never change, so they are written once rather than on every frame.
+  useEffect(() => {
+    const m = cubes.current;
+    if (!m) return;
+    for (let x = 0, i = 0; x < cols; x++) for (let y = 0; y < rows; y++, i++) m.setColorAt(i, (x + y) % 2 ? colorA : colorB);
+    if (m.instanceColor) m.instanceColor.needsUpdate = true;
+  }, [colorA, colorB]);
   const spokes = 12;
   return (
     <group ref={g}>
@@ -317,7 +361,7 @@ function RenderDim({ n }: { n: number }) {
       <Stars count={Math.floor(n / 3)} color={p.c} />
       <group position={[4.8, 0.6, -6]}>
         <mesh ref={knot}>
-          <torusKnotGeometry args={[1.6, 0.5, 160, 24]} />
+          <torusKnotGeometry args={[1.6, 0.5, 96, 14]} />
           <meshStandardMaterial color={p.a} metalness={0.6} roughness={0.25} />
         </mesh>
         <mesh ref={wire} scale={1.35}>
@@ -424,7 +468,7 @@ function Portal({ n }: { n: number }) {
           if (i % 3 !== 0) return null;
           return (
             <mesh key={i / 3} position={[basePositions[i], basePositions[i + 1], basePositions[i + 2]]}>
-              <icosahedronGeometry args={[0.7, 3]} />
+              <icosahedronGeometry args={[0.7, 2]} />
               <meshBasicMaterial color={(i / 3) % 2 === 0 ? p.a : p.b} transparent opacity={0.5} />
             </mesh>
           );
@@ -434,17 +478,19 @@ function Portal({ n }: { n: number }) {
   );
 }
 
-export default function Scene({ variant, lite }: { variant: Variant; lite: boolean }) {
-  const n = lite ? 500 : 1600;
+export default function Scene({ variant, lite, onSlow }: { variant: Variant; lite: boolean; onSlow?: () => void }) {
+  const n = lite ? 360 : 1000;
   return (
     <Canvas
       camera={{ position: [0, 0, 9], fov: 55 }}
-      dpr={lite ? [1, 1.25] : [1, 1.75]}
-      gl={{ antialias: !lite, powerPreference: "low-power", alpha: true }}
+      frameloop="demand"
+      dpr={1}
+      gl={{ antialias: false, powerPreference: "low-power", alpha: true }}
       eventSource={typeof document !== "undefined" ? document.body : undefined}
       eventPrefix="client"
       style={{ pointerEvents: "none" }}
     >
+      <Pacer fps={lite ? 24 : 30} onSlow={onSlow} />
       <ambientLight intensity={0.55} />
       <directionalLight position={[6, 8, 6]} intensity={1.4} />
       <pointLight position={[-8, -4, 4]} intensity={20} color={PALETTE[variant].a} />

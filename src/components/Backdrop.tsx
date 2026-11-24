@@ -3,29 +3,11 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import type { Variant } from "./Scene";
-import { QUALITY_EVENT, readQuality, type Quality } from "@/lib/quality";
+import { QUALITY_EVENT, demote, readQuality, resolveTier, type Tier } from "@/lib/quality";
 
 const Scene = dynamic(() => import("./Scene"), { ssr: false });
 
-type Mode = "pending" | "full" | "lite" | "static";
-
-function webglAvailable(): boolean {
-  try {
-    const c = document.createElement("canvas");
-    return !!(c.getContext("webgl2") || c.getContext("webgl"));
-  } catch {
-    return false;
-  }
-}
-
-function autoMode(): "full" | "lite" {
-  const nav = navigator as Navigator & { deviceMemory?: number };
-  const weak =
-    window.innerWidth < 760 ||
-    (navigator.hardwareConcurrency ?? 8) <= 4 ||
-    (nav.deviceMemory ?? 8) < 4;
-  return weak ? "lite" : "full";
-}
+type Mode = "pending" | Tier;
 
 /**
  * Decides how much 3D to run.
@@ -40,11 +22,7 @@ export default function Backdrop({ variant }: { variant: Variant }) {
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const decide = () => {
-      const q: Quality = readQuality();
-      if (mq.matches || q === "off" || !webglAvailable()) return setMode("static");
-      setMode(q === "auto" ? autoMode() : q);
-    };
+    const decide = () => setMode(resolveTier());
     decide();
     mq.addEventListener("change", decide);
     window.addEventListener(QUALITY_EVENT, decide);
@@ -59,7 +37,12 @@ export default function Backdrop({ variant }: { variant: Variant }) {
   }
   return (
     <div className="backdrop" aria-hidden="true">
-      <Scene key={`${variant}-${mode}`} variant={variant} lite={mode === "lite"} />
+      <Scene
+        key={`${variant}-${mode}`}
+        variant={variant}
+        lite={mode === "lite"}
+        onSlow={() => readQuality() === "auto" && demote(mode === "lite" ? "lite" : "full")}
+      />
     </div>
   );
 }
